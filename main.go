@@ -3,8 +3,8 @@ package main
 import (
 	"embed"
 	"fyne.io/fyne/v2/app"
-	"fynetest/internal"
-	"fynetest/myTheme"
+	"github.com/lijingbo8119/minesweeper-fyne/internal"
+	"github.com/lijingbo8119/minesweeper-fyne/myTheme"
 	_ "image/gif"
 	_ "image/png"
 )
