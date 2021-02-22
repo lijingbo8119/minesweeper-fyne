@@ -81,6 +81,7 @@ func (this *_state) SetMatrixParamAndRender(rowsLength int, colsLength int, mine
 	this.matrix = NewMatrix(rowsLength, colsLength, minesCount)
 	this.SetStartTime(nil)
 	this.SetEndTime(nil)
+	this.resetCoordinates()
 
 	this.durationSeconds = binding.NewString()
 	label := widget.NewLabelWithData(this.durationSeconds)

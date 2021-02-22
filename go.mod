@@ -1,4 +1,4 @@
-module fynetest
+module github.com/lijingbo8119/minesweeper-fyne
 
 go 1.16
 
