@@ -51,7 +51,7 @@ func (this *_state) SetEndTime(t ...*time.Time) {
 	}
 }
 
-func (this *_state) doCheck() {
+func (this *_state) doCheckSuccess() {
 	minesCount := 0
 	markedMinesCount := 0
 	markedNormalsCount := 0
@@ -73,6 +73,9 @@ func (this *_state) doCheck() {
 		})
 
 	if minesCount == markedMinesCount && markedNormalsCount == 0 {
+		this.matrix.
+			findSquares(func(s *Square) bool { return s.SquareStatus == SquareStatusClosed && s.SquareType == SquareTypeNormal }).
+			each(func(s *Square) { s.open(true) })
 		this.SetEndTime()
 	}
 }
@@ -211,7 +214,7 @@ func (this *_state) leftClick(c Coordinate) {
 		this.SetStartTime()
 	}
 	this.matrix.findSquare(func(square *Square) bool { return square.SquareCoordinate.equal(c) }).open(true)
-	this.doCheck()
+	this.doCheckSuccess()
 }
 
 func (this *_state) rightClick(c Coordinate) {
@@ -220,7 +223,7 @@ func (this *_state) rightClick(c Coordinate) {
 		t := time.Now()
 		this.startTime = &t
 	}
-	this.doCheck()
+	this.doCheckSuccess()
 }
 
 func (this *_state) leftRightClick(c Coordinate) {
@@ -229,7 +232,7 @@ func (this *_state) leftRightClick(c Coordinate) {
 		return
 	}
 	square.openAroundSquares()
-	this.doCheck()
+	this.doCheckSuccess()
 }
 
 var State = new(_state)
