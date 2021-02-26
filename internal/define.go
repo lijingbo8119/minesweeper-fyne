@@ -1,7 +1,5 @@
 package internal
 
-import "errors"
-
 type SquareStatus int
 
 const (
@@ -19,6 +17,3 @@ const (
 	SquareTypeMine
 )
 
-var (
-	ErrorStatusError = errors.New("状态错误")
-)

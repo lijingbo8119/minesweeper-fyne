@@ -17,18 +17,18 @@ type Square struct {
 func (this *Square) MouseDown(m *desktop.MouseEvent) {
 	switch m.Button {
 	case desktop.MouseButtonPrimary:
-		State.leftMouseDown(this.SquareCoordinate)
+		State.mouseState.LeftMouseDown(this.SquareCoordinate)
 	case desktop.MouseButtonSecondary:
-		State.rightMouseDown(this.SquareCoordinate)
+		State.mouseState.RightMouseDown(this.SquareCoordinate)
 	}
 }
 
 func (this *Square) MouseUp(m *desktop.MouseEvent) {
 	switch m.Button {
 	case desktop.MouseButtonPrimary:
-		State.leftMouseUp(this.SquareCoordinate)
+		State.mouseState.LeftMouseUp(this.SquareCoordinate)
 	case desktop.MouseButtonSecondary:
-		State.rightMouseUp(this.SquareCoordinate)
+		State.mouseState.RightMouseUp(this.SquareCoordinate)
 	}
 }
 
@@ -47,23 +47,23 @@ func (this *Square) setStatus(s SquareStatus) {
 			case SquareTypeNormal:
 				switch len(this.AroundSquares.filter(func(square *Square) bool { return square.SquareType == SquareTypeMine })) {
 				case 0:
-					this.SetResource(resources.num0)
+					this.SetResource(resources.mineNum0)
 				case 1:
-					this.SetResource(resources.num1)
+					this.SetResource(resources.mineNum1)
 				case 2:
-					this.SetResource(resources.num2)
+					this.SetResource(resources.mineNum2)
 				case 3:
-					this.SetResource(resources.num3)
+					this.SetResource(resources.mineNum3)
 				case 4:
-					this.SetResource(resources.num4)
+					this.SetResource(resources.mineNum4)
 				case 5:
-					this.SetResource(resources.num5)
+					this.SetResource(resources.mineNum5)
 				case 6:
-					this.SetResource(resources.num6)
+					this.SetResource(resources.mineNum6)
 				case 7:
-					this.SetResource(resources.num7)
+					this.SetResource(resources.mineNum7)
 				case 8:
-					this.SetResource(resources.num8)
+					this.SetResource(resources.mineNum8)
 				}
 			case SquareTypeMine:
 				this.SetResource(resources.mine0)
@@ -73,23 +73,23 @@ func (this *Square) setStatus(s SquareStatus) {
 			case SquareTypeNormal:
 				switch len(this.AroundSquares.filter(func(square *Square) bool { return square.SquareType == SquareTypeMine })) {
 				case 0:
-					this.SetResource(resources.num0)
+					this.SetResource(resources.mineNum0)
 				case 1:
-					this.SetResource(resources.num1)
+					this.SetResource(resources.mineNum1)
 				case 2:
-					this.SetResource(resources.num2)
+					this.SetResource(resources.mineNum2)
 				case 3:
-					this.SetResource(resources.num3)
+					this.SetResource(resources.mineNum3)
 				case 4:
-					this.SetResource(resources.num4)
+					this.SetResource(resources.mineNum4)
 				case 5:
-					this.SetResource(resources.num5)
+					this.SetResource(resources.mineNum5)
 				case 6:
-					this.SetResource(resources.num6)
+					this.SetResource(resources.mineNum6)
 				case 7:
-					this.SetResource(resources.num7)
+					this.SetResource(resources.mineNum7)
 				case 8:
-					this.SetResource(resources.num8)
+					this.SetResource(resources.mineNum8)
 				}
 			case SquareTypeMine:
 				this.SetResource(resources.mine0)
@@ -114,7 +114,7 @@ func (this *Square) open(triggeredByClick bool) bool {
 	if this.SquareType == SquareTypeMine && triggeredByClick {
 		this.setStatus(SquareStatusExploded)
 		t := time.Now()
-		State.endTime = &t
+		State.SetEndTime(&t)
 		return false
 	}
 
