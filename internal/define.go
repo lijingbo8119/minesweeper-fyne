@@ -6,6 +6,7 @@ const (
 	SquareStatusClosed SquareStatus = iota
 	SquareStatusMouseDown
 	SquareStatusMarkedFlag
+	SquareStatusMarkedWrong
 	SquareStatusOpened
 	SquareStatusExploded
 )

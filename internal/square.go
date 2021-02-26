@@ -3,7 +3,6 @@ package internal
 import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
-	"time"
 )
 
 type Square struct {
@@ -40,6 +39,8 @@ func (this *Square) setStatus(s SquareStatus) {
 		this.SetResource(resources.mousedown)
 	case SquareStatusMarkedFlag:
 		this.SetResource(resources.flag)
+	case SquareStatusMarkedWrong:
+		this.SetResource(resources.mine1)
 	case SquareStatusOpened:
 		switch this.SquareStatus {
 		case SquareStatusClosed:
@@ -113,8 +114,7 @@ func (this *Square) open(triggeredByClick bool) bool {
 	}
 	if this.SquareType == SquareTypeMine && triggeredByClick {
 		this.setStatus(SquareStatusExploded)
-		t := time.Now()
-		State.SetEndTime(&t)
+		State.SetEndTime()
 		return false
 	}
 
@@ -151,6 +151,17 @@ func (this *Square) mark() {
 }
 
 func (this *Square) openAroundSquares() {
+	markedWrongMines := this.AroundSquares.
+		filter(func(s *Square) bool { return s.SquareType == SquareTypeNormal && s.SquareStatus == SquareStatusMarkedFlag })
+	if len(markedWrongMines) > 0 {
+		markedWrongMines.each(func(s *Square) { s.setStatus(SquareStatusMarkedWrong) })
+		this.AroundSquares.
+			filter(func(s *Square) bool { return s.SquareType == SquareTypeMine && (s.SquareStatus == SquareStatusClosed || s.SquareStatus == SquareStatusMouseDown) }).
+			each(func(s *Square) { s.setStatus(SquareStatusOpened) })
+		State.SetEndTime()
+		return
+	}
+
 	if unmarkedMines := this.AroundSquares.filter(func(s *Square) bool {
 		return s.SquareType == SquareTypeMine && s.SquareStatus != SquareStatusMarkedFlag
 	}); len(unmarkedMines) > 0 {
