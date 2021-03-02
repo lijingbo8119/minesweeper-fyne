@@ -1,4 +1,4 @@
-package internal
+package core
 
 import (
 	"fyne.io/fyne/v2"

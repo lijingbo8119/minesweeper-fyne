@@ -1,4 +1,4 @@
-package internal
+package core
 
 import (
 	"embed"
@@ -8,6 +8,12 @@ import (
 type _resources struct {
 	blank     *fyne.StaticResource
 	mousedown *fyne.StaticResource
+
+	face0 *fyne.StaticResource
+	face1 *fyne.StaticResource
+	face2 *fyne.StaticResource
+	face3 *fyne.StaticResource
+	face4 *fyne.StaticResource
 
 	num0 *fyne.StaticResource
 	num1 *fyne.StaticResource
@@ -49,6 +55,21 @@ func Init(images embed.FS) {
 
 	data, _ = images.ReadFile("images/mousedown.gif")
 	resources.mousedown = fyne.NewStaticResource("mousedown.gif", data)
+
+	data, _ = images.ReadFile("images/face0.gif")
+	resources.face0 = fyne.NewStaticResource("face0.gif", data)
+
+	data, _ = images.ReadFile("images/face1.gif")
+	resources.face1 = fyne.NewStaticResource("face1.gif", data)
+
+	data, _ = images.ReadFile("images/face2.gif")
+	resources.face2 = fyne.NewStaticResource("face2.gif", data)
+
+	data, _ = images.ReadFile("images/face3.gif")
+	resources.face3 = fyne.NewStaticResource("face3.gif", data)
+
+	data, _ = images.ReadFile("images/face4.gif")
+	resources.face4 = fyne.NewStaticResource("face4.gif", data)
 
 	data, _ = images.ReadFile("images/d0.gif")
 	resources.num0 = fyne.NewStaticResource("d0.gif", data)

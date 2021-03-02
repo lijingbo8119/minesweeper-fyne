@@ -1,4 +1,4 @@
-package internal
+package core
 
 import (
 	"errors"
@@ -6,15 +6,20 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
 	"github.com/gogf/gf/util/gconv"
+	"sync"
 	"time"
 )
 
 type _state struct {
-	window fyne.Window
+	windowOnce sync.Once
+	window     fyne.Window
 
-	matrix *Matrix
+	minesCount int
+	matrix     *Matrix
+
+	minesCountRef *Ref
+	smileFaceRef  *Ref
 
 	mouseState *MouseState
 
@@ -71,6 +76,7 @@ func (this *_state) doCheckFinish() {
 
 	if explodedCount > 0 {
 		this.SetEndTime()
+		this.smileFaceRef.Set(0)
 		dialog.ShowError(errors.New("Exploded!"), this.window)
 		return
 	}
@@ -80,11 +86,13 @@ func (this *_state) doCheckFinish() {
 			findSquares(func(s *Square) bool { return s.SquareStatus == SquareStatusClosed && s.SquareType == SquareTypeNormal }).
 			each(func(s *Square) { s.open(true) })
 		this.SetEndTime()
+		this.smileFaceRef.Set(1)
 		dialog.ShowInformation("congratulations!", "haha~", this.window)
 	}
 }
 
 func (this *_state) SetMatrixParamAndRender(rowsLength int, colsLength int, minesCount int) {
+	this.minesCount = minesCount
 	this.matrix = NewMatrix(rowsLength, colsLength, minesCount)
 	this.SetStartTime(nil)
 	this.SetEndTime(nil)
@@ -94,7 +102,45 @@ func (this *_state) SetMatrixParamAndRender(rowsLength int, colsLength int, mine
 		RegisterLeftRightMouseDownHandler(this.leftRightMouseDownHandler).RegisterLeftRightMouseUpHandler(this.leftRightMouseUpHandler).
 		RegisterResetHandler(this.resetHandler)
 
-	c0 := NewNumberContainer()
+	this.windowOnce.Do(func() {
+		this.window.SetMainMenu(fyne.NewMainMenu(
+			fyne.NewMenu("Game",
+				fyne.NewMenuItem("Easy", func() { this.SetMatrixParamAndRender(9, 9, 10) }),
+				fyne.NewMenuItem("Intermediate", func() { this.SetMatrixParamAndRender(16, 16, 40) }),
+				fyne.NewMenuItem("Expert", func() { this.SetMatrixParamAndRender(16, 30, 99) }),
+			),
+		))
+	})
+
+	numbersContainer := container.New(layout.NewHBoxLayout())
+
+	timeNumberWidget := NewNumberContainer()
+	timeRef := new(Ref).
+		AddListener(func(val interface{}) { timeNumberWidget.SetNumber(val.(int)) }).
+		Set(0)
+
+	smileFaceWidget := newSmileFace(func() { this.SetMatrixParamAndRender(rowsLength, colsLength, minesCount) })
+	this.smileFaceRef = new(Ref).
+		AddListener(func(val interface{}) {
+			switch val.(int) {
+			case 0:
+				smileFaceWidget.SetResource(resources.face3)
+			case 1:
+				smileFaceWidget.SetResource(resources.face4)
+			}
+		})
+
+	markedMinesCountWidget := NewNumberContainer()
+	this.minesCountRef = new(Ref).
+		AddListener(func(val interface{}) { markedMinesCountWidget.SetNumber(val.(int)) }).
+		Set(this.minesCount)
+
+	numbersContainer.Add(timeNumberWidget.Container)
+	numbersContainer.Add(layout.NewSpacer())
+	numbersContainer.Add(smileFaceWidget)
+	numbersContainer.Add(layout.NewSpacer())
+	numbersContainer.Add(markedMinesCountWidget.Container)
+
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
@@ -102,26 +148,14 @@ func (this *_state) SetMatrixParamAndRender(rowsLength int, colsLength int, mine
 				continue
 			}
 			end := time.Now()
-			c0.SetNumber(gconv.Int(end.Sub(*this.startTime).Seconds()))
+			timeRef.Set(gconv.Int(end.Sub(*this.startTime).Seconds()))
 			if this.endTime != nil {
 				break
 			}
 		}
 	}()
 
-	this.window.SetMainMenu(fyne.NewMainMenu(
-		fyne.NewMenu("Game",
-			fyne.NewMenuItem("Easy", func() { this.SetMatrixParamAndRender(9, 9, 10) }),
-			fyne.NewMenuItem("Intermediate", func() { this.SetMatrixParamAndRender(16, 16, 40) }),
-			fyne.NewMenuItem("Expert", func() { this.SetMatrixParamAndRender(16, 30, 99) }),
-		),
-	))
-
-	b1 := widget.NewButton("Restart", func() {
-		this.SetMatrixParamAndRender(rowsLength, colsLength, minesCount)
-	})
-
-	c1 := container.New(layout.NewVBoxLayout(), c0.Container, b1)
+	c1 := container.New(layout.NewVBoxLayout(), numbersContainer)
 
 	c2 := container.New(layout.NewGridLayoutWithColumns(len((*this.matrix)[0])))
 	for _, row := range *this.matrix {
@@ -184,10 +218,18 @@ func (this *_state) rightMouseUpHandler(c Coordinate) {
 		findSquares(func(square *Square) bool { return square.SquareCoordinate.equal(c) }).
 		each(func(s *Square) { s.mark() })
 
+	marked := this.matrix.
+		findSquares(func(square *Square) bool { return square.SquareStatus == SquareStatusMarkedFlag })
+
+	this.minesCountRef.Set(this.minesCount - len(marked))
+
 	this.doCheckFinish()
 }
 
 func (this *_state) leftRightMouseDownHandler(c Coordinate) {
+	if this.endTime != nil {
+		return
+	}
 	square := this.matrix.findSquare(func(square *Square) bool { return square.SquareCoordinate.equal(c) })
 
 	switch square.SquareStatus {
@@ -211,6 +253,9 @@ func (this *_state) leftRightMouseDownHandler(c Coordinate) {
 }
 
 func (this *_state) leftRightMouseUpHandler(c Coordinate) {
+	if this.endTime != nil {
+		return
+	}
 	square := this.matrix.findSquare(func(square *Square) bool { return square.SquareCoordinate.equal(c) })
 
 	switch square.SquareStatus {

@@ -1,4 +1,4 @@
-package myTheme
+package core
 
 import (
 	"fyne.io/fyne/v2"
