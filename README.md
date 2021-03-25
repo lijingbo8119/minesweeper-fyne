@@ -11,4 +11,4 @@ A friendly way to take backups for your important files
 
 ## Preview
 
-![preview.gif](https://raw.githubusercontent.com/master/preview.gif)
+![preview.gif](https://github.com/lijingbo8119/minesweeper-fyne/raw/main/preview.gif)
