@@ -1,7 +1,5 @@
 # minesweeper-fyne
 
-A friendly way to take backups for your important files
-
 **To install this, go to the [releases page](https://github.com/lijingbo8119/minesweeper-fyne/releases)**
 
 ## Thanks to
